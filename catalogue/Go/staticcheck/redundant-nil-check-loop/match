@@ -1,0 +1,3 @@
+if :[var_check] != nil {
+  for :[defines] := range :[var_use] {:[inner_body]}
+}

@@ -1,0 +1,3 @@
+'(assoc-in coll [k0 k1] a) '(assoc coll k0 (assoc (k0 coll) k1 a))
+'(assoc-in coll [k0 k1] a) '(assoc coll k0 (assoc (coll k0) k1 a))
+'(assoc-in coll [k0 k1] a) '(assoc coll k0 (assoc (get coll k0) k1 a))

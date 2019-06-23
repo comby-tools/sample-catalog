@@ -1,0 +1,1 @@
+let Err(:[underscore]) = Err:::[type](:[value])

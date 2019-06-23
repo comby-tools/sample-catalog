@@ -1,0 +1,2 @@
+'(vector a)   '(conj [] a)
+'(vector a b) '(conj [] a b)

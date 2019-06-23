@@ -1,0 +1,3 @@
+if :[1]::[body1]
+elif :[2]: # dup cond!! :[body2]
+else::[_]

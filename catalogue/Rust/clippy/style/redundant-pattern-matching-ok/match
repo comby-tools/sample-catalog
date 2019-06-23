@@ -1,0 +1,1 @@
+let Ok(:[underscore]) = Ok:::[type](:[value])

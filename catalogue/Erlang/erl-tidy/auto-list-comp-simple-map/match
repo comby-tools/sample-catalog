@@ -1,0 +1,1 @@
+lists:map(fun :[fn_name]/1, :[list])

@@ -1,0 +1,6 @@
+where :[container1] == :[container2],
+match :[container1] {
+| "List" -> true
+| "Array" -> true
+| "Set" -> true
+}

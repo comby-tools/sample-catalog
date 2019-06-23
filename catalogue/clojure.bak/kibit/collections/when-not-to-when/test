@@ -1,0 +1,4 @@
+'(when (seq a) b) '(when-not (empty? a) b)
+
+# this one is composite, when compbined with not-empty-to-seq
+'(when (seq a) b) '(when (not (empty? a)) b)

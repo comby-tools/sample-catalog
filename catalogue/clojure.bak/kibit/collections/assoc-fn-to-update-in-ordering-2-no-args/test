@@ -1,0 +1,6 @@
+'(update-in coll [k] f) '(assoc coll k (f (k coll)))
+'(update-in coll [k] f) '(assoc coll k (f (coll k)))
+'(update-in coll [k] f) '(assoc coll k (f (get coll k)))
+'(update-in coll [k] f a b c) '(assoc coll k (f (k coll) a b c))
+'(update-in coll [k] f a b c) '(assoc coll k (f (coll k) a b c))
+'(update-in coll [k] f a b c) '(assoc coll k (f (get coll k) a b c))

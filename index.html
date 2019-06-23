@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>Rewrite Catalog</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/styles/github.min.css"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <style>
+        blockquote { font-size: 1em; }
+        [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak { display: none !important; }
+        .form-inline .checkbox { margin-right: 0.6em }
+        .panel-heading { cursor: pointer; }
+        .panel-heading:hover { background-color: #eee; }
+        .panel-title { display: flex; }
+        .panel-title .label { display: inline-block; }
+        .panel-title-name { flex: 1; }
+        .panel-title-name span { vertical-align: bottom; }
+        .panel .panel-title-name .anchor { display: none; }
+        .panel:hover .panel-title-name .anchor { display: inline; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container" ng-app="clippy" ng-controller="entryList">
+        <div class="page-header">
+            <h1>Rewrite Catalog</h1>
+        </div>
+
+        <noscript>
+            <div class="alert alert-danger" role="alert">
+                Sorry, this site only works with JavaScript! :(
+            </div>
+        </noscript>
+
+        <div ng-cloak>
+
+            <div class="alert alert-info" role="alert" ng-if="loading">
+                Loading&#x2026;
+            </div>
+            <div class="alert alert-danger" role="alert" ng-if="error">
+                Error loading entries!
+            </div>
+
+            <div class="panel panel-default" ng-show="data">
+                <div class="panel-body row">
+                    <div class="col-md-6 form-inline">
+                        <div class="form-group form-group-lg">
+                            <p class="h4">Languages</p>
+                            <div class="checkbox" ng-repeat="(language, enabled) in languages">
+                                <label>
+                                    <input type="checkbox" ng-model="languages[language]" />
+                                    {{language}}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 form-inline">
+                        <div class="form-group form-group-lg">
+                            <p class="h4">Tags</p>
+                            <div class="checkbox" ng-repeat="(tag, enabled) in tags">
+                                <label class="text-capitalize">
+                                    <input type="checkbox" ng-model="tags[tag]" />
+                                    {{tag}}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body row">
+                    <div class="col-md-12 form-horizontal">
+                        <div class="input-group">
+                            <label class="input-group-addon" id="filter-label" for="filter-input">Filter:</label>
+                            <input type="text" class="form-control" placeholder="Keywords or search string" id="filter-input" ng-model="search" />
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" ng-click="search = ''">
+                                    Clear
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="panel panel-default" id="{{entry.name}}"
+                ng-repeat="entry in data | filter:byLanguages | filter:byTags | filter:search | orderBy:'id' track by entry.name" on-finish-render="ngRepeatFinished">
+                <header class="panel-heading" ng-click="open[entry.name] = !open[entry.name]">
+                    <h2 class="panel-title">
+                        <div class="panel-title-name">
+                            <span>{{entry.name}}</span>
+                            <a href="#{{entry.name}}" class="anchor label label-default" ng-click="open[entry.name] = true; $event.stopPropagation()">&para;</a>
+                        </div>
+                        <div class="panel-title-addons">
+			    <span class="label label-default text-capitalize" ng-repeat-start="tag in entry.tags" ng-bind="tag"></span> <span ng-repeat-end></span>
+
+			    <span class="label label-primary">{{entry.language}}</span>
+
+                            <button class="btn btn-default btn-xs">
+                                <span ng-show="open[entry.name]">&minus;</span>
+                                <span ng-hide="open[entry.name]">&plus;</span>
+                            </button>
+                        </div>
+                    </h2>
+                </header>
+
+                <ul class="list-group entry-doc" ng-if="entry.doc" ng-class="{collapse: true, in: open[entry.name]}">
+		  <li class="list-group-item">
+		    <div class="row">
+		      <div class="col-md-12">
+                        <h4 class="list-group-item-heading">What it does</h4>
+                        <div class="list-group-item-text" ng-bind-html="entry.doc['What it does'] | markdown"></div>
+                        <span class="label label-warning"><a style="color: white" href="https://comby.live#{{entry.live}}">Load Live Example <i class="fas fa-external-link-alt"></i></a></span>
+		      </div>
+		    </div>
+		  </li>
+		  <li class="list-group-item">
+		    <div class="row">
+		      <div class="col-md-6">
+                        <h4 class="list-group-item-heading">Match</h4>
+                        <div class="list-group-item-text" ng-bind-html="entry.doc['match'] | markdown"></div>
+			<div class="list-group-item-text" ng-bind-html="entry.doc['match_rule'] | markdown"></div>
+		      </div>
+		      <div class="col-md-6">
+                        <h4 class="list-group-item-heading">Rewrite</h4>
+                        <div class="list-group-item-text" ng-bind-html="entry.doc['rewrite'] | markdown"></div>
+			<div class="list-group-item-text" ng-bind-html="entry.doc['rewrite_rule'] | markdown"></div>
+		      </div>
+		    </div>
+		  </li>
+
+		  <li class="list-group-item">
+		    <div class="row">
+		      <div class="col-md-12">
+			<h4 class="list-group-item-heading">Example</h4>
+		      </div>
+		      <div class="col-md-6">
+                        <h5 class="list-group-item-heading">Input Source</h5>
+                        <div class="list-group-item-text" ng-bind-html="entry.doc['source'] | markdown"></div>
+		      </div>
+		      <div class="col-md-6">
+                        <h5 class="list-group-item-heading">Diff</h5>
+                        <div class="list-group-item-text" ng-bind-html="entry.doc['diff'] | markdown"></div>
+		      </div>
+		    </div>
+                  </li>
+                  <li class="list-group-item" ng-repeat="(heading, content) in entry.doc" ng-if="heading != 'source' && heading != 'diff' && heading != 'match' && heading != 'rewrite' && heading != 'match_rule' && heading != 'rewrite_rule' && heading != 'What it does'">
+		    <div class="row">
+		      <div class="col-md-12">
+                        <h5 class="list-group-item-heading">{{heading}}</h5>
+                        <div class="list-group-item-text" ng-bind-html="content | markdown"></div>
+		      </div>
+		    </div>
+                  </li>
+                </ul>
+            </article>
+        </div>
+    </div>
+
+    <a href="https://github.com/rust-lang/rust-clippy">
+    <!--    <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on Github"/> -->
+    </a>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/7.0.0/markdown-it.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/highlight.min.js"></script>
+    <script src="./js/highlight-comby.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.12/angular.min.js"></script>
+    <script>
+    (function () {
+        var md = window.markdownit({
+            html: true,
+            linkify: true,
+            typographer: true,
+            highlight: function (str, lang) {
+                console.log('higlight: ' + lang);
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        console.log('trying: ' + lang);
+                        return '<pre class="hljs"><code>' +
+                            hljs.highlight(lang, str, true).value +
+                            '</code></pre>';
+                    } catch (__) {}
+                }
+                return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
+            }
+        });
+        function scrollToEntry(entryId) {
+            var target = document.getElementById(entryId);
+            if (!target) {
+                return;
+            }
+            target.scrollIntoView();
+        }
+        function scrollToEntryByURL($scope) {
+            var removeListener = $scope.$on('ngRepeatFinished', function(ngRepeatFinishedEvent) {
+                scrollToEntry(window.location.hash.slice(1));
+                removeListener();
+            });
+        }
+        function selectTag($scope, selectedTag) {
+            var tags = $scope.tags;
+            for (var tag in tags) {
+                if (tags.hasOwnProperty(tag)) {
+                    if (tag === selectedTag) {
+                        tags[tag] = true;
+                    } else {
+                        tags[tag] = false;
+                    }
+                }
+            }
+        }
+        angular.module("clippy", [])
+        .filter('markdown', function ($sce) {
+            return function (text) {
+                return $sce.trustAsHtml(
+                    md.render(text || '')
+                    // Oh deer, what a hack :O
+                    .replace('<table', '<table class="table"')
+                );
+            };
+        })
+        .directive('onFinishRender', function ($timeout) {
+            return {
+                restrict: 'A',
+                link: function (scope, element, attr) {
+                    if (scope.$last === true) {
+                        $timeout(function () {
+                            scope.$emit(attr.onFinishRender);
+                        });
+                    }
+                }
+            };
+        })
+        .controller("entryList", function ($scope, $http, $timeout) {
+	    $scope.languages = {};
+            $scope.byLanguages = function (entry) {
+		return $scope.languages[entry.language];
+            };
+            $scope.tags = {};
+            $scope.byTags = function (entry) {
+		// If there are no tags, display it. For now.
+		if (entry.tags.length === 0) {
+		    return true;
+		}
+		for (var i in entry.tags) {
+		    if ($scope.tags[entry.tags[i]]) {
+			return true;
+		    }
+		}
+		return false;
+            };
+            // Get data
+            $scope.open = {};
+            $scope.loading = true;
+            if (window.location.hash.length > 1) {
+                $scope.search = window.location.hash.slice(1);
+                $scope.open[window.location.hash.slice(1)] = true;
+                scrollToEntryByURL($scope);
+            }
+            $http.get('./catalogue.json')
+            .success(function (data) {
+                $scope.data = data;
+                $scope.loading = false;
+                // Initialize entry tags (the same structure is also used to enable filtering)
+                $scope.tags = data.reduce(function (result, val) {
+		    for (var i in val.tags) {
+			result[val.tags[i]] = true;
+		    }
+		    return result
+                }, {});
+                var selectedTag = getQueryVariable("sel");
+                if (selectedTag) {
+                    selectTag($scope, selectedTag.toLowerCase());
+                }
+		$scope.languages = data.reduce(function(result, val) {
+		    result[val.language] = true;
+		    return result
+		}, {});
+                scrollToEntryByURL($scope);
+            })
+            .error(function (data) {
+                $scope.error = data;
+                $scope.loading = false;
+            });
+            window.addEventListener('hashchange', function () {
+                // trigger re-render
+                $timeout(function () {
+                    // $scope.levels = LEVEL_FILTERS_DEFAULT;
+                    $scope.search = window.location.hash.slice(1);
+                    $scope.open[window.location.hash.slice(1)] = true;
+                    scrollToEntryByURL($scope);
+                });
+                return true;
+            }, false);
+        });
+    })();
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split('&');
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+            if (decodeURIComponent(pair[0]) == variable) {
+                return decodeURIComponent(pair[1]);
+            }
+        }
+    }
+    </script>
+</body>
+</html>

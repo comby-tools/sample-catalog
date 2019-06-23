@@ -1,0 +1,1 @@
+|> :[container1].map (:[fn1] >> :[fn2])

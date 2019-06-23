@@ -1,0 +1,1 @@
+(apply str (reverse :[1]))

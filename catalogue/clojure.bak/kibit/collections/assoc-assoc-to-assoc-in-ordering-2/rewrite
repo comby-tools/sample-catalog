@@ -1,0 +1,1 @@
+(assoc-in :[coll0] [:[key0] :[key2]] :[val])

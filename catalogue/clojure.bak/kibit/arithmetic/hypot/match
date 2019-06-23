@@ -1,0 +1,1 @@
+(Math/sqrt (+ (Math/pow :[1] 2) (Math/pow :[2] 2)))

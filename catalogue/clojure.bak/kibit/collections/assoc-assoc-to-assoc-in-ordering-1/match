@@ -1,0 +1,1 @@
+(assoc :[coll0] :[key0] (assoc (:[key1] :[coll1]) :[key2] :[val]))

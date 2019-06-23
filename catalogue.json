@@ -1,0 +1,336 @@
+[
+  {
+    "doc": {
+      "What it does": "Simplifies module includes", 
+      "Author": "Anonymous", 
+      "rewrite": "```comby\nmodule :[module_define] = :[module_include]\n```", 
+      "Known problems": "None", 
+      "source": "```ocaml\nmodule That_queue : Queue_intf = struct\n  include Linked_queue\nend\n```", 
+      "diff": "```diff\n-module That_queue : Queue_intf = struct\n-  include Linked_queue\n-end\n+module That_queue : Queue_intf = Linked_queue\n```", 
+      "Id": "simplify-module-include-comby-ocaml-1000", 
+      "match": "```comby\nmodule :[module_define] = struct include :[[module_include]] end\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".ml\", \"rewrite\": \"module :[module_define] = :[module_include]\", \"rule\": \"\", \"source\": \"module That_queue : Queue_intf = struct\\n  include Linked_queue\\nend\\n\", \"id\": 0, \"match\": \"module :[module_define] = struct include :[[module_include]] end\"}", 
+    "name": "simplify-module-include", 
+    "language": "OCaml", 
+    "tags": [
+      "Redundancy"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Removes redundant `continue` statement in `for` loops.", 
+      "Known problems": "None", 
+      "source": "```c++\nint main() {\n  for (i = 0; i < 10; i++) { continue; }\n}\n```", 
+      "Reference": "[clang-tidy check](https://clang.llvm.org/extra/clang-tidy/checks/readability-redundant-control-flow.html)", 
+      "rewrite": "```comby\nfor (:[1]) {}\n```", 
+      "diff": "```diff\n int main() {\n-  for (i = 0; i < 10; i++) { continue; }\n+  for (i = 0; i < 10; i++) {}\n }\n```", 
+      "Author": "Anonymous", 
+      "Id": "clang-tidy-readability-redundant-control-flow-1000", 
+      "match": "```comby\nfor (:[1]) { continue; }\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".c\", \"rewrite\": \"for (:[1]) {}\", \"rule\": \"\", \"source\": \"int main() {\\n  for (i = 0; i < 10; i++) { continue; }\\n}\\n\", \"id\": 0, \"match\": \"for (:[1]) { continue; }\"}", 
+    "name": "control-flow-for-continue", 
+    "language": "C++", 
+    "tags": [
+      "Editor", 
+      "Redundancy", 
+      "Style"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Uses `Equal` instead of `Compare` for bytes", 
+      "Known problems": "None", 
+      "Improvements": "Add reference implementation", 
+      "source": "```go\nif bytes.Compare(x, y) == 0 {}\n```", 
+      "Reference": "See [Statticheck](https://staticcheck.io/docs/checks#S1004)", 
+      "rewrite": "```comby\nif bytes.Equal(:[1], :[2]) {:[3]}\n```", 
+      "diff": "```diff\n-if bytes.Compare(x, y) == 0 {}\n+if bytes.Equal(x, y) {}\n```", 
+      "Author": "Anonymous", 
+      "Id": "staticcheck-replace-with-bytes-equal-1004", 
+      "match": "```comby\nif bytes.Compare(:[1], :[2]) == 0 {:[3]}\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".go\", \"rewrite\": \"if bytes.Equal(:[1], :[2]) {:[3]}\", \"rule\": \"\", \"source\": \"if bytes.Compare(x, y) == 0 {}\\n\", \"id\": 0, \"match\": \"if bytes.Compare(:[1], :[2]) == 0 {:[3]}\"}", 
+    "name": "replace-with-bytes-equal", 
+    "language": "Go", 
+    "tags": [
+      "Style"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Uses `Contains` for string matching instead of checking index", 
+      "Known problems": "None", 
+      "Improvements": "Add reference implementation", 
+      "source": "```go\nif strings.Index(x, y) != -1 {}\n```", 
+      "Reference": "See [Statticheck](https://staticcheck.io/docs/checks#S1003)", 
+      "rewrite": "```comby\nif strings.Contains(:[1], :[2]) {:[3]}\n```", 
+      "diff": "```diff\n-if strings.Index(x, y) != -1 {}\n+if strings.Contains(x, y) {}\n```", 
+      "Author": "Anonymous", 
+      "Id": "staticcheck-replace-with-string-contains-1003", 
+      "match": "```comby\nif strings.Index(:[1], :[2]) != -1 {:[3]}\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".go\", \"rewrite\": \"if strings.Contains(:[1], :[2]) {:[3]}\", \"rule\": \"\", \"source\": \"if strings.Index(x, y) != -1 {}\\n\", \"id\": 0, \"match\": \"if strings.Index(:[1], :[2]) != -1 {:[3]}\"}", 
+    "name": "replace-with-string-contains", 
+    "language": "Go", 
+    "tags": [
+      "Style"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Removes redundant `nil` checks.", 
+      "Known problems": "This rule is only allowed on maps and slices, but may match on if statements that check pointers. Checks on pointers should not be removed.", 
+      "match_rule": "```comby\nwhere :[var_check] == :[var_use]\n```", 
+      "Reference": "See [Statticheck](https://staticcheck.io/docs/checks#S1009)", 
+      "rewrite": "```comby\nfor :[defines] := range :[var_use] {:[inner_body]}\n```", 
+      "diff": "```diff\n func (HTTPRequest *HTTPRequest) run(client *Client) ([]byte, error) {\n \tvar err error\n \tvalues := make(url.Values)\n-\tif HTTPRequest.Parameters != nil {\n-\t\tfor k, v := range HTTPRequest.Parameters {\n+\tfor k, v := range HTTPRequest.Parameters {\n \t\t\tvalues.Set(k, fmt.Sprintf(\"%v\", v))\n \t\t}\n-\t}\n }\n```", 
+      "Author": "Anonymous", 
+      "Id": "staticcheck-replace-with-bytes-equal-1004", 
+      "match": "```comby\nif :[var_check] != nil {\n  for :[defines] := range :[var_use] {:[inner_body]}\n}\n```", 
+      "source": "```go\nfunc (HTTPRequest *HTTPRequest) run(client *Client) ([]byte, error) {\n\tvar err error\n\tvalues := make(url.Values)\n\tif HTTPRequest.Parameters != nil {\n\t\tfor k, v := range HTTPRequest.Parameters {\n\t\t\tvalues.Set(k, fmt.Sprintf(\"%v\", v))\n\t\t}\n\t}\n}\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".go\", \"rewrite\": \"for :[defines] := range :[var_use] {:[inner_body]}\", \"rule\": \"where :[var_check] == :[var_use]\\n\", \"source\": \"func (HTTPRequest *HTTPRequest) run(client *Client) ([]byte, error) {\\n\\tvar err error\\n\\tvalues := make(url.Values)\\n\\tif HTTPRequest.Parameters != nil {\\n\\t\\tfor k, v := range HTTPRequest.Parameters {\\n\\t\\t\\tvalues.Set(k, fmt.Sprintf(\\\"%25v\\\", v))\\n\\t\\t}\\n\\t}\\n}\\n\", \"id\": 0, \"match\": \"if :[var_check] != nil {\\n  for :[defines] := range :[var_use] {:[inner_body]}\\n}\"}", 
+    "name": "redundant-nil-check-loop", 
+    "language": "Go", 
+    "tags": [
+      "Style"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Simplifies `if not` conditionals to `if-not`", 
+      "Known problems": "None", 
+      "source": "```clojure\n'(if (not test) then else)\n```", 
+      "Reference": "See [kibit](https://github.com/jonase/kibit/blob/master/kibit/src/kibit/rules/collections.clj), [control structures rule](https://github.com/jonase/kibit/blob/master/kibit/src/kibit/rules/control_structures.clj).", 
+      "rewrite": "```comby\n(if-not :[1] :[2] :[3])\n```", 
+      "diff": "```diff\n-'(if (not test) then else)\n+'(if-not test then else)\n```", 
+      "Author": "Anonymous", 
+      "Id": "if-not-kibit-1001", 
+      "match": "```comby\n(if (not :[1]) :[2] :[3])\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".clj\", \"rewrite\": \"(if-not :[1] :[2] :[3])\", \"rule\": \"\", \"source\": \"'(if (not test) then else)\\n\", \"id\": 0, \"match\": \"(if (not :[1]) :[2] :[3])\"}", 
+    "name": "if-not", 
+    "language": "Clojure", 
+    "tags": [
+      "Style"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Simplifies `if` conditionals to use `when`", 
+      "Known problems": "None", 
+      "source": "```clojure\n'(if test then nil)\n```", 
+      "Reference": "See [kibit](https://github.com/jonase/kibit/blob/master/kibit/src/kibit/rules/collections.clj), [control structures rule](https://github.com/jonase/kibit/blob/master/kibit/src/kibit/rules/control_structures.clj).", 
+      "rewrite": "```comby\n(when :[1] :[2])\n```", 
+      "diff": "```diff\n-'(if test then nil)\n+'(when test then)\n```", 
+      "Author": "Anonymous", 
+      "Id": "when-kibit-1002", 
+      "match": "```comby\n(if :[1] :[2] nil)\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".clj\", \"rewrite\": \"(when :[1] :[2])\", \"rule\": \"\", \"source\": \"'(if test then nil)\\n\", \"id\": 0, \"match\": \"(if :[1] :[2] nil)\"}", 
+    "name": "when-test", 
+    "language": "Clojure", 
+    "tags": [
+      "Style"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Simplifies `assoc` calls to `assoc-in`", 
+      "Known problems": "None", 
+      "match_rule": "```comby\nwhere :[coll0] == :[coll1], :[key0] == :[key1]\n```", 
+      "Reference": "See [kibit](https://github.com/jonase/kibit/blob/master/kibit/src/kibit/rules/collections.clj), [collections rule](https://github.com/jonase/kibit/blob/master/kibit/src/kibit/rules/collections.clj).", 
+      "rewrite": "```comby\n(assoc-in :[coll0] [:[key0] :[key2]] :[val])\n```", 
+      "diff": "```diff\n-'(assoc coll k0 (assoc (get coll k0) k1 a))\n+'(assoc-in coll [k0 k1] a)\n```", 
+      "Author": "Anonymous", 
+      "Id": "assoc-assoc-to-in-get-kibit-1000", 
+      "match": "```comby\n(assoc :[coll0] :[key0] (assoc (get :[coll1] :[key1]) :[key2] :[val]))\n```", 
+      "source": "```clojure\n'(assoc coll k0 (assoc (get coll k0) k1 a))\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".clj\", \"rewrite\": \"(assoc-in :[coll0] [:[key0] :[key2]] :[val])\", \"rule\": \"where :[coll0] == :[coll1], :[key0] == :[key1]\\n\", \"source\": \"'(assoc coll k0 (assoc (get coll k0) k1 a))\\n\", \"id\": 0, \"match\": \"(assoc :[coll0] :[key0] (assoc (get :[coll1] :[key1]) :[key2] :[val]))\"}", 
+    "name": "assoc-assoc-to-assoc-in-get", 
+    "language": "Clojure", 
+    "tags": [
+      "Style"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Replaces `where` type checks with a more readable `whereType`", 
+      "Known problems": "Only works if `whereType` is implemented.", 
+      "match_rule": "```comby\nwhere :[var_bind] == :[var_use]\n```", 
+      "Reference": "See [Effective Dart](https://v1-dartlang-org.firebaseapp.com/guides/language/effective-dart/usage#dont-use-length-to-see-if-a-collection-is-empty). Reference [implementation](https://github.com/dart-lang/linter/blob/master/lib/src/rules/prefer_is_empty.dart) in [dart-lang linter](https://github.com/dart-lang/linter).", 
+      "rewrite": "```comby\n.whereType<:[type]>()\n```", 
+      "diff": "```diff\n-iterable.where((e) => e is T)\n+iterable.whereType<T>()\n```", 
+      "Author": "Anonymous", 
+      "Id": "effective-dart-where-type-1000", 
+      "match": "```comby\n.where((:[var_bind]) => :[var_use] is :[[type]])\n```", 
+      "source": "```dart\niterable.where((e) => e is T)\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".dart\", \"rewrite\": \".whereType<:[type]>()\", \"rule\": \"where :[var_bind] == :[var_use]\\n\", \"source\": \"iterable.where((e) => e is T)\\n\", \"id\": 0, \"match\": \".where((:[var_bind]) => :[var_use] is :[[type]])\"}", 
+    "name": "use-where-type", 
+    "language": "Dart", 
+    "tags": [
+      "Readability"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Removes redundant `continue` statement in `for` loops.", 
+      "Known problems": "Only works for `Iterable` and `Map` instances.", 
+      "source": "```dart\nvoid main() {\n    var todo = [];\n    if (!todo.isEmpty) print('things to do...');\n}\n```", 
+      "Reference": "Reference [implementation](https://github.com/dart-lang/linter/blob/master/lib/src/rules/prefer_is_not_empty.dart) in [dart-lang linter](https://github.com/dart-lang/linter).", 
+      "rewrite": "```comby\nif (:[container].isNotEmpty)\n```", 
+      "diff": "```diff\n void main() {\n     var todo = [];\n-    if (!todo.isEmpty) print('things to do...');\n+    if (todo.isNotEmpty) print('things to do...');\n }\n```", 
+      "Author": "Anonymous", 
+      "Id": "effective-dart-use-is-not-empty-1000", 
+      "match": "```comby\nif (!:[container].isEmpty)\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".dart\", \"rewrite\": \"if (:[container].isNotEmpty)\", \"rule\": \"\", \"source\": \"void main() {\\n    var todo = [];\\n    if (!todo.isEmpty) print('things to do...');\\n}\\n\", \"id\": 0, \"match\": \"if (!:[container].isEmpty)\"}", 
+    "name": "prefer-is-not-empty", 
+    "language": "Dart", 
+    "tags": [
+      "Readability"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Replaces length checks with a more readable and performant getters.", 
+      "Known problems": "Only works if :[container] is a type implementing the `isNotEmpty` property.", 
+      "Improvements": "Add an `isEmpty` variant.", 
+      "source": "```dart\nvoid main() {\n    var lunchBox = [];\n    if (lunchBox.length != 0) print('ready to eat...');\n}\n```", 
+      "Reference": "See [Effective Dart](https://v1-dartlang-org.firebaseapp.com/guides/language/effective-dart/usage#dont-use-length-to-see-if-a-collection-is-empty). Reference [implementation](https://github.com/dart-lang/linter/blob/master/lib/src/rules/prefer_is_empty.dart) in [dart-lang linter](https://github.com/dart-lang/linter).", 
+      "rewrite": "```comby\nif (:[container].isNotEmpty)\n```", 
+      "diff": "```diff\n void main() {\n     var lunchBox = [];\n-    if (lunchBox.length != 0) print('ready to eat...');\n+    if (lunchBox.isNotEmpty) print('ready to eat...');\n }\n```", 
+      "Author": "Anonymous", 
+      "Id": "effective-dart-prefer-is-empty-1000", 
+      "match": "```comby\nif (:[container].length != 0)\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".dart\", \"rewrite\": \"if (:[container].isNotEmpty)\", \"rule\": \"\", \"source\": \"void main() {\\n    var lunchBox = [];\\n    if (lunchBox.length != 0) print('ready to eat...');\\n}\\n\", \"id\": 0, \"match\": \"if (:[container].length != 0)\"}", 
+    "name": "prefer-is-empty", 
+    "language": "Dart", 
+    "tags": [
+      "Performance", 
+      "Readability"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Removes single redundant field names.", 
+      "Known problems": "None", 
+      "match_rule": "```comby\nwhere :[field] == :[use]\n```", 
+      "Reference": "See [rust-clippy](https://rust-lang.github.io/rust-clippy/master/index.html#redundant_field_names)", 
+      "rewrite": "```comby\n{ :[field] }\n```", 
+      "diff": "```diff\n struct Foo {\n     bar: u8,\n }\n-let foo = Foo { bar: bar };\n+let foo = Foo { bar };\n```", 
+      "Author": "Anonymous", 
+      "Id": "redundant-field-names-1000", 
+      "match": "```comby\n{ :[[field]]: :[[use]] }\n```", 
+      "source": "```rust\nlet bar: u8 = 123;\nstruct Foo {\n    bar: u8,\n}\nlet foo = Foo { bar: bar };\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".rs\", \"rewrite\": \"{ :[field] }\", \"rule\": \"where :[field] == :[use]\\n\", \"source\": \"let bar: u8 = 123;\\nstruct Foo {\\n    bar: u8,\\n}\\nlet foo = Foo { bar: bar };\\n\", \"id\": 0, \"match\": \"{ :[[field]]: :[[use]] }\"}", 
+    "name": "redundant-field-names-single", 
+    "language": "Rust", 
+    "tags": [
+      "Redundancy"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Uses `++` infix operator instead of `List.append`", 
+      "Known problems": "None", 
+      "source": "```erlang\nget_values(T, Key, lists:append(V, Acc)).\n```", 
+      "Reference": "See erl-tidier described in [this paper](https://users.ece.cmu.edu/~aavgerin/papers/PPDP09.pdf).", 
+      "rewrite": "```comby\n:[1] ++ :[2]\n```", 
+      "diff": "```diff\n-get_values(T, Key, lists:append(V, Acc)).\n+get_values(T, Key, V ++ Acc).\n```", 
+      "Author": "Anonymous", 
+      "Id": "infix-append-erl-tidier-1000", 
+      "match": "```comby\nlists:append(:[1], :[2])\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".erl\", \"rewrite\": \":[1] ++ :[2]\", \"rule\": \"\", \"source\": \"get_values(T, Key, lists:append(V, Acc)).\\n\", \"id\": 0, \"match\": \"lists:append(:[1], :[2])\"}", 
+    "name": "append", 
+    "language": "Erlang", 
+    "tags": [
+      "Readability"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Simplifies `List.map` to a list comprehension.", 
+      "Known problems": "None", 
+      "source": "```erlang\nlists:map(fun x/1, l)\n```", 
+      "Reference": "See [erl_tidy](http://erlang.org/doc/man/erl_tidy.html) and [syntax_tools](https://github.com/erlang/otp/tree/master/lib/syntax_tool)", 
+      "rewrite": "```comby\n[:[fn_name](V1) || V1 <- :[list]]\n```", 
+      "diff": "```diff\n-lists:map(fun x/1, l)\n+[x(V1) || V1 <- l]\n```", 
+      "Author": "Anonymous", 
+      "Id": "auto-list-comp-erlang", 
+      "match": "```comby\nlists:map(fun :[fn_name]/1, :[list])\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".erl\", \"rewrite\": \"[:[fn_name](V1) || V1 <- :[list]]\", \"rule\": \"\", \"source\": \"lists:map(fun x/1, l)\\n\", \"id\": 0, \"match\": \"lists:map(fun :[fn_name]/1, :[list])\"}", 
+    "name": "auto-list-comp-simple-map", 
+    "language": "Erlang", 
+    "tags": [
+      "Readability"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Simplifies a consecutive pipe left operation `|>` for map", 
+      "Known problems": "None", 
+      "match_rule": "```comby\nwhere :[container1] == :[container2],\nmatch :[container1] {\n| \"List\" -> true\n| \"Array\" -> true\n| \"Set\" -> true\n}\n```", 
+      "Reference": "See [elm-lint](https://github.com/jfmengels/elm-lint)", 
+      "rewrite": "```comby\n|> :[container1].map (:[fn1] >> :[fn2])\n```", 
+      "diff": "```diff\n typeRefs\n         |> allRefs\n         |> importsWithoutSelf apiSubmodule importingFrom\n-        |> List.map toModuleName\n-        |> List.map toImportString\n+        |> List.map (toModuleName >> toImportString)\n         |> String.join \"\\n\"\n```", 
+      "Author": "Anonymous", 
+      "Id": "elm-lint-simplify-pipe-left-1000", 
+      "match": "```comby\n|> :[[container1]].map :[[fn1]]\n|> :[[container2]].map :[[fn2]]\n```", 
+      "source": "```elm\ntypeRefs\n        |> allRefs\n        |> importsWithoutSelf apiSubmodule importingFrom\n        |> List.map toModuleName\n        |> List.map toImportString\n        |> String.join \"\\n\"\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".elm\", \"rewrite\": \"|> :[container1].map (:[fn1] >> :[fn2])\", \"rule\": \"where :[container1] == :[container2],\\nmatch :[container1] {\\n| \\\"List\\\" -> true\\n| \\\"Array\\\" -> true\\n| \\\"Set\\\" -> true\\n}\\n\", \"source\": \"typeRefs\\n        |> allRefs\\n        |> importsWithoutSelf apiSubmodule importingFrom\\n        |> List.map toModuleName\\n        |> List.map toImportString\\n        |> String.join \\\"\\\\n\\\"\\n\", \"id\": 0, \"match\": \"|> :[[container1]].map :[[fn1]]\\n|> :[[container2]].map :[[fn2]]\"}", 
+    "name": "simplify-piping", 
+    "language": "Elm", 
+    "tags": [
+      "Readability"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Simplifies folds that checks a \"for-all\" condition.", 
+      "Known problems": "None", 
+      "match_rule": "```comby\nwhere :[1] == :[2]\n```", 
+      "Reference": "See [Scala tips-and-tricks](https://pavelfatin.com/scala-collections-tips-and-tricks)", 
+      "rewrite": "```comby\n.forall(identity)\n```", 
+      "diff": "```diff\n val l = List(true, false, false, true)\n-val andAll = l.foldLeft(true)(_ && _)\n+val andAll = l.forall(identity)\n```", 
+      "Author": "Anonymous", 
+      "Id": "use-for-all-comby-scala-1000", 
+      "match": "```comby\n.foldLeft(true)(:[1] && :[2])\n```", 
+      "source": "```scala\nval l = List(true, false, false, true)\nval andAll = l.foldLeft(true)(_ && _)\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".scala\", \"rewrite\": \".forall(identity)\", \"rule\": \"where :[1] == :[2]\\n\", \"source\": \"val l = List(true, false, false, true)\\nval andAll = l.foldLeft(true)(_ && _)\\n\", \"id\": 0, \"match\": \".foldLeft(true)(:[1] && :[2])\"}", 
+    "name": "use-forall", 
+    "language": "Scala", 
+    "tags": [
+      "Readability"
+    ]
+  }, 
+  {
+    "doc": {
+      "What it does": "Simplifies `.filter(...).size` call chains to use `.count`", 
+      "Known problems": "None", 
+      "source": "```scala\nobject Test {\n  val list = List(1,2,3,4).filter(_ % 2 == 0).size\n}\n```", 
+      "Reference": "See [Scapegoat](https://github.com/sksamuel/scapegoat), and [collections test](https://github.com/sksamuel/scapegoat/blob/master/src/test/scala/com/sksamuel/scapegoat/inspections/collections/FilterDotSizeTest.scala)", 
+      "rewrite": "```comby\n.count(:[1])\n```", 
+      "diff": "```diff\n object Test {\n-  val list = List(1,2,3,4).filter(_ % 2 == 0).size\n+  val list = List(1,2,3,4).count(_ % 2 == 0)\n }\n```", 
+      "Author": "Anonymous", 
+      "Id": "count-scapegoat-scala-1000", 
+      "match": "```comby\n.filter(:[1]).size\n```"
+    }, 
+    "live": "{\"substitution_kind\": \"in_place\", \"language\": \".scala\", \"rewrite\": \".count(:[1])\", \"rule\": \"\", \"source\": \"object Test {\\n  val list = List(1,2,3,4).filter(_ %25 2 == 0).size\\n}\\n\", \"id\": 0, \"match\": \".filter(:[1]).size\"}", 
+    "name": "filter-dot-size", 
+    "language": "Scala", 
+    "tags": [
+      "Readability"
+    ]
+  }
+]
