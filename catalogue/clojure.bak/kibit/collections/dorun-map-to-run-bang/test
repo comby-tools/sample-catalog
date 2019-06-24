@@ -1,1 +1,0 @@
-'(run! f coll) '(dorun (map f coll))

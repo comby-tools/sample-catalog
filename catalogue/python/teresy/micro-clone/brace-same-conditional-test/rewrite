@@ -1,2 +1,0 @@
-if {:[1]: # dup cond!! :[body1]
-elif :[2]::[body2] }

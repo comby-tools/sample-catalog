@@ -1,1 +1,0 @@
-(apply concat (map :[1] :[2]))

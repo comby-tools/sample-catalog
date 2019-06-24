@@ -1,1 +1,0 @@
-'(assoc-in coll [k1 k2] v) '(update-in coll [k1 k2] assoc v)

@@ -1,1 +1,0 @@
-'(seq a) '(not (empty? a))

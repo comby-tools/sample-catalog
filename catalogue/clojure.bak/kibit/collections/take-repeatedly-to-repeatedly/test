@@ -1,1 +1,0 @@
-'(repeatedly 10 (constantly :foo)) '(take 10 (repeatedly (constantly :foo)))
