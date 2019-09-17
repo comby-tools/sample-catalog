@@ -1,1 +1,1 @@
-lists:map(fun x/1, l)
+lists:map(fun x/1, l end)
