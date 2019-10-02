@@ -217,5 +217,10 @@ def main():
     with open("catalogue.json", "w") as outfile:
         json.dump(catalogue, outfile, indent=2)
 
+def check_python_version():
+    if sys.version_info[0] != 2:
+        raise Exception("Must be using Python 2")
+
 if __name__ == "__main__":
+    check_python_version()
     main()

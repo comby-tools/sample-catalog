@@ -15,7 +15,7 @@ The top level language under the `catalogue` directory defines the language labe
 
 ## Generating
 
-Run `python generate.py`. This creates a `catalogue.json`. The JSON file is refenced in `index.html` to generate the site.
+Run `python generate.py` (uses Python 2). This creates a `catalogue.json`. The JSON file is refenced in `index.html` to generate the site.
 
 ## Examples
 
