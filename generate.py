@@ -6,7 +6,7 @@ import sys
 import os
 import subprocess
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 comby_path = "comby"
 
@@ -156,15 +156,15 @@ def generate_live_json(language, path, files):
 
 def process_leaf(path, files, subdirs, language):
     leaf = "DOC.md" in files and "match" in files and "rewrite" in files
-    entry = {}
+    entry = OrderedDict()
     parent = os.path.basename(path)
     if leaf:
         doc = parse_doc_markdown(os.path.join(path, "DOC.md"))
-        entry["tags"] = doc["Tags"]
-        entry["language"] = language
         entry["doc"] = generate_entry_doc(language, doc, path, files)
-        entry["name"] = parent
         entry["live"] = generate_live_json(language, path, files)
+        entry["name"] = parent
+        entry["language"] = language
+        entry["tags"] = doc["Tags"]
         return entry
     else: # TODO
         return {}
