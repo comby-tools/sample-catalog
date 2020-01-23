@@ -4,4 +4,3 @@
 **Id:** python2-lambda-filter-to-list
 **Tags:** ["Compatibility"]
 **Known problems:** Should break Python 3 programs if applied, because there filter() returns a generator.
-

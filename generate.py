@@ -14,15 +14,16 @@ def parse_doc_markdown(doc_file_path):
     doc_md = defaultdict(lambda: "[]")
     doc_line = re.compile(r'''^\*\*([\w\s]+?)[:?.!]?\*\*(.*)''')
     with open(doc_file_path) as doc_file_path:
-        for line in doc_file_path:
+        for idx, line in enumerate(doc_file_path):
             match = re.match(doc_line, line)
             if match:
                 heading = match.groups()[0].lstrip()
                 text = match.groups()[1].lstrip()
                 doc_md[heading] = text
             else:
-                print ("Bad doc.md format in {}".format(doc_file_path))
-                os.exit(1)
+                print("Bad doc.md format in {}".format(doc_file_path))
+                print("Line no.{} didn't match:\n{}".format(idx+1, line))
+                sys.exit(1)
         tags = doc_md["Tags"]
         doc_md["Tags"] = eval(tags)
     return doc_md
