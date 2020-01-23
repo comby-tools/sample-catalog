@@ -68,9 +68,9 @@ def generate_diff_file(path, source):
     print("Running: {}".format(command))
     diff = subprocess.check_output(command, shell=True)
     _ = subprocess.check_output("git checkout -- {}".format(os.path.join(path, source)), shell=True)
-    diff = '\n'.join((diff.split('\n')[5:]))
+    diff = b'\n'.join((diff.split(b'\n')[5:]))
     diff_out_path = os.path.join(path, "source.diff")
-    with open(diff_out_path, "w") as outfile:
+    with open(diff_out_path, "wb") as outfile:
         outfile.write(diff)
 
 
@@ -218,10 +218,5 @@ def main():
     with open("catalogue.json", "w") as outfile:
         json.dump(catalogue, outfile, indent=2)
 
-def check_python_version():
-    if sys.version_info[0] != 2:
-        raise Exception("Must be using Python 2")
-
 if __name__ == "__main__":
-    check_python_version()
     main()
