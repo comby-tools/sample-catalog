@@ -1,5 +1,3 @@
-# sample-catalog
-
 A sample catalog with rewrite templates. Feel free to fork and modify with your own! 
 
 ## Layout
@@ -17,7 +15,7 @@ Note that when running the `-templates` option without any other flags, all file
 The top level language under the `catalogue` directory defines the language label in the rendered site. Use the format in the newline-separated `DOC.md` files ([example](https://raw.githubusercontent.com/comby-tools/sample-catalog/master/catalogue/Dart/dart_style/prefer-is-empty/DOC.md)) to produce output entries as in the [rendered catalog website](https://catalog.comby.dev). 
 
 
-## Generating
+## Generating the web site
 
 Run `python generate.py` (uses Python 2). This creates a `catalogue.json`. The JSON file is refenced in `index.html` to generate the site.
 
