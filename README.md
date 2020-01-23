@@ -4,7 +4,11 @@ A sample catalog with rewrite templates. Feel free to fork and modify with your 
 
 ## Layout
 
-The `catalogue` folder contains a directory tree of templates. Each leaf folder is one rewrite pattern, containing a `match` file, a `rewrite` file, and optionally, a `rule` file. The `match` file contents is the match pattern, the `rewrite` file contents the rewrite pattern, and the optional `rule` file starts with a `where ...` rule.
+The `catalogue` folder contains a directory tree of templates. Each leaf folder is one rewrite pattern, containing the following files.
+
+  - `match` - contains the match pattern
+  - `rewrite` - the rewrite pattern
+  - `rule` - optional file with a `where ...` rule
 
 When a directory tree is specified with `comby -templates catalogue`, the `catalogue` directory tree is traversed fully and every rewrite pattern is run against the file in the leaf folders. 
 
@@ -22,3 +26,5 @@ Run `python generate.py` (uses Python 2). This creates a `catalogue.json`. The J
 See the [rendered catalog](https://catalog.comby.dev/) for this repository.
 
 See the [comby](https://github.com/comby-tools/comby) tool or [docs](https://comby.dev/) for using it!
+
+
