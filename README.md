@@ -26,3 +26,27 @@ See the [rendered catalog](https://catalog.comby.dev/) for this repository.
 See the [comby](https://github.com/comby-tools/comby) tool or [docs](https://comby.dev/) for using it!
 
 
+## Example creating new template
+
+Create new directory `catalogue/echo` with match and rewrite patterns.
+```
+mkdir catalogue/echo
+# add match and rewrite patterns
+echo '(:[emoji] hi)' > catalogue/echo/match
+echo 'bye :[emoji]' > catalogue/echo/rewrite
+```
+Test is with `comby`.
+```
+$ comby -templates catalogue/echo -stdin -matcher .lisp <<< '(👋 hi)'
+------ /dev/null
+++++++ /dev/null
+@|-1,1 +1,1 ============================================================
+-|(👋 hi)
++|bye 👋
+```
+We explicitly specify `.lisp` matcher, because with `-stdin` input `comby` is unable to detect matcher from file extension.
+
+Running the same command with `docker` will be slightly more verbose.
+```
+docker run --rm -i -a stdin -a stdout -a stderr -v "$(pwd)"/catalogue:/opt/catalogue comby/comby -templates /opt/catalogue/echo -stdin -matcher .lisp <<< '(👋 hi)'
+```
