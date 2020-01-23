@@ -74,8 +74,8 @@ def generate_diff_file(path, source):
 
 
 def read_source_and_diff(path, files):
-    sources = filter(lambda x: x.startswith("source"), files)
-    source = filter(lambda x: not x.endswith("diff"), sources)
+    sources = [x for x in files if x.startswith("source")]
+    source = [x for x in sources if not x.endswith("diff")]
     if source != []:
         source = source[0]
     else:
