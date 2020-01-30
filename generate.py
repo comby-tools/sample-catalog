@@ -6,7 +6,7 @@ import sys
 import os
 import subprocess
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 comby_path = "comby"
 
@@ -14,15 +14,16 @@ def parse_doc_markdown(doc_file_path):
     doc_md = defaultdict(lambda: "[]")
     doc_line = re.compile(r'''^\*\*([\w\s]+?)[:?.!]?\*\*(.*)''')
     with open(doc_file_path) as doc_file_path:
-        for line in doc_file_path:
+        for idx, line in enumerate(doc_file_path):
             match = re.match(doc_line, line)
             if match:
                 heading = match.groups()[0].lstrip()
                 text = match.groups()[1].lstrip()
                 doc_md[heading] = text
             else:
-                print ("Bad doc.md format in {}".format(doc_file_path))
-                os.exit(1)
+                print("Bad doc.md format in {}".format(doc_file_path))
+                print("Line no.{} didn't match:\n{}".format(idx+1, line))
+                sys.exit(1)
         tags = doc_md["Tags"]
         doc_md["Tags"] = eval(tags)
     return doc_md
@@ -67,15 +68,15 @@ def generate_diff_file(path, source):
     print("Running: {}".format(command))
     diff = subprocess.check_output(command, shell=True)
     _ = subprocess.check_output("git checkout -- {}".format(os.path.join(path, source)), shell=True)
-    diff = '\n'.join((diff.split('\n')[5:]))
+    diff = b'\n'.join((diff.split(b'\n')[5:]))
     diff_out_path = os.path.join(path, "source.diff")
-    with open(diff_out_path, "w") as outfile:
+    with open(diff_out_path, "wb") as outfile:
         outfile.write(diff)
 
 
 def read_source_and_diff(path, files):
-    sources = filter(lambda x: x.startswith("source"), files)
-    source = filter(lambda x: not x.endswith("diff"), sources)
+    sources = [x for x in files if x.startswith("source")]
+    source = [x for x in sources if not x.endswith("diff")]
     if source != []:
         source = source[0]
     else:
@@ -155,15 +156,15 @@ def generate_live_json(language, path, files):
 
 def process_leaf(path, files, subdirs, language):
     leaf = "DOC.md" in files and "match" in files and "rewrite" in files
-    entry = {}
+    entry = OrderedDict()
     parent = os.path.basename(path)
     if leaf:
         doc = parse_doc_markdown(os.path.join(path, "DOC.md"))
-        entry["tags"] = doc["Tags"]
-        entry["language"] = language
         entry["doc"] = generate_entry_doc(language, doc, path, files)
-        entry["name"] = parent
         entry["live"] = generate_live_json(language, path, files)
+        entry["name"] = parent
+        entry["language"] = language
+        entry["tags"] = doc["Tags"]
         return entry
     else: # TODO
         return {}
@@ -217,10 +218,5 @@ def main():
     with open("catalogue.json", "w") as outfile:
         json.dump(catalogue, outfile, indent=2)
 
-def check_python_version():
-    if sys.version_info[0] != 2:
-        raise Exception("Must be using Python 2")
-
 if __name__ == "__main__":
-    check_python_version()
     main()
